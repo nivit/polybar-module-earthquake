@@ -1,6 +1,6 @@
 if .metadata.count > 0 then
 
-    if $what == "last" then
+    if $what == "latest" then
         .features[0]
     else
         .features | max_by(.properties.mag)
