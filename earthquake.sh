@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 # title: Polybar Module - Earthquake
 # project-home: https://github.com/nivit/polybar-module-earthquake
@@ -42,6 +42,19 @@ earthquake='-- no earthquake data --'
 # override default values
 if [ -f ${earthquake_conf} ]; then
     . ${earthquake_conf}
+fi
+
+# check availability of the requested programs
+if ! fetch_cmd_loc="$(type -p "${fetch_cmd}")" || \
+    [[ -z ${fetch_cmd_loc} ]]; then
+    echo "-- ${fetch_cmd} not installed!";
+    exit 1
+fi
+
+if ! jq_cmd_loc="$(type -p "${jq_cmd}")" || \
+    [[ -z ${jq_cmd_loc} ]]; then
+    echo "-- ${jq_cmd} not installed!";
+    exit 1
 fi
 
 echo ${earthquake}
