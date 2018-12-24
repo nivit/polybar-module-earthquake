@@ -15,6 +15,8 @@ fetch_cmd=/usr/bin/curl
 
 earthquake_conf=${HOME}/.config/polybar/module/earthquake/earthquake.conf
 
+earthquakes_json=${HOME}/.config/polybar/module/earthquake/last_earthquakes.json
+
 google_maps_url='https://maps.google.com/maps/@'
 
 jq_cmd=/usr/bin/jq  # program to parse USGS data
@@ -34,10 +36,7 @@ zoom_factor=8
 
 xdg_cmd=/usr/bin/xdg-open
 
-
 ################
-
-earthquake='-- no earthquake data --'
 
 # override default values
 if [ -f ${earthquake_conf} ]; then
@@ -51,12 +50,33 @@ if ! fetch_cmd_loc="$(type -p "${fetch_cmd}")" || \
     exit 1
 fi
 
+# select the correct silent option for the fetch command
+case "${fetch_cmd}" in
+    "fetch" | "wget" )
+       fetch_options="-q"
+    ;;
+    "curl" )
+        fetch_options="-s"
+    ;;
+esac
+
 if ! jq_cmd_loc="$(type -p "${jq_cmd}")" || \
     [[ -z ${jq_cmd_loc} ]]; then
     echo "-- ${jq_cmd} not installed!";
     exit 1
 fi
 
-echo ${earthquake}
+# download USGS data
+if [ -z "$1" -o ! -f "${earthquakes_json}" ]; then
+    ${fetch_cmd} -o ${earthquakes_json} \
+        ${fetch_options}  'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/1.0_hour.geojson'
+fi
+
+no_data='-- no earthquake data --'
+
+if [ ! -s ${earthquake_json} ]; then
+    echo ${no_data}
+    exit 1
+fi
 
 # vi:expandtab softtabstop=4 smarttab shiftwidth=4 tabstop=4
