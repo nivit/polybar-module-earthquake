@@ -24,6 +24,12 @@ google_maps_url='https://maps.google.com/maps/@'
 
 jq_cmd=jq  # program to parse USGS data
 
+magnitude1_color="#8f9d6a"
+magnitude2_color="#838184"
+magnitude3_color="#9b703f"
+magnitude4_color="#f9ee98"
+magnitude_color="#cf6a4c"  # magnitude > 4
+
 # alert on an earthquake with a magnitude greater than that
 #min_magnitude=1
 
@@ -32,6 +38,8 @@ satellite_view=yes  # or no
 
 tsunami_alert=1
 tsunami_icon="⚠ "
+
+underline_title="yes"
 
 usgs_url='https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/1.0_hour.geojson'
 
@@ -77,7 +85,7 @@ if ! xdg_cmd_loc="$(type -p "${xdg_cmd}")" || \
 fi
 
 # download USGS data
-if [ -z "$1" -o ! -f "${earthquakes_json}" ]; then
+if [ -z "$1" -o ! -f "${earthquakes_json}" -a "${debug}" = "0" ]; then
     ${fetch_cmd} -o ${earthquakes_json} \
         ${fetch_options}  ${usgs_url}
 fi
@@ -111,7 +119,7 @@ if [ ! -z "$1" ]; then
             ${xdg_cmd} ${url}&
             exit 0
         ;;
-        "toggle-earthquake-mode")
+        "toggle-earthquake-type")
             if [ "${earthquake_mode}" = "latest" ]; then
                 earthquake_mode=max
             else
@@ -136,9 +144,34 @@ else
         tsunami_msg=""
     fi
 
+    if [ "X${underline_title}X" = "XyesX" ]; then
+        mag=$(${jq_cmd} -r -M -f ${module_dir}/earthquake.jq --arg get mag --arg what ${earthquake_mode} ${earthquakes_json})
+
+        case "${mag%%.*}" in
+            "1")
+                underline_color=${magnitude1_color}
+                ;;
+            "2")
+                underline_color=${magnitude2_color}
+                ;;
+            "3")
+                underline_color=${magnitude3_color}
+                ;;
+            "4")
+                underline_color=${magnitude4_color}
+                ;;
+            *)
+                underline_color=${magnitude_color}
+        esac
+
+        underline_format="%{u${underline_color} +u}"
+    else
+        underline_format=""
+    fi
+
     title=$(${jq_cmd} -r -M -f ${module_dir}/earthquake.jq --arg get title --arg what ${earthquake_mode} ${earthquakes_json})
 
-    echo ${title}${tsunami_msg}
+    echo ${underline_format}${title}${tsunami_msg}
 
     exit 0
 fi
