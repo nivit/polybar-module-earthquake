@@ -31,6 +31,7 @@ jq_cmd=jq  # program to parse USGS data
 satellite_view=yes  # or no
 
 tsunami_alert=1
+tsunami_icon="⚠ "
 
 usgs_url='https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/1.0_hour.geojson'
 
@@ -129,8 +130,10 @@ else
     if [ "${tsunami_alert}" = "yes" ]; then
         tsunami=$(${jq_cmd} -r -M -f ${module_dir}/earthquake.jq --arg get tsunami --arg what ${earthquake_mode} ${earthquakes_json})
         if [ "${tsunami}" = "1" ]; then
-            tsunami_msg=" %{B#f00 F#fff}-- TSUNAMI ALERT --"
+            tsunami_msg=" %{B#f00 F#fff}-- ${tsunami_icon} TSUNAMI ALERT --"
         fi
+    else
+        tsunami_msg=""
     fi
 
     title=$(${jq_cmd} -r -M -f ${module_dir}/earthquake.jq --arg get title --arg what ${earthquake_mode} ${earthquakes_json})
