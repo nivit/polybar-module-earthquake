@@ -111,7 +111,7 @@ if [ ! -z "$1" ]; then
             ${xdg_cmd} ${url}&
             exit 0
         ;;
-        "toggle-earthquake-type")
+        "toggle-earthquake-mode")
             if [ "${earthquake_mode}" = "latest" ]; then
                 earthquake_mode=max
             else
