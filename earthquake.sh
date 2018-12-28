@@ -101,7 +101,7 @@ if [ ! -z "$1" ]; then
     case "$1" in
         "open-google-map")
             coords=$(${jq_cmd} -c -M -f ${module_dir}/earthquake.jq --arg get coords --arg what ${earthquake_mode} \
-                ${earthquakes_json} | tr '\n' ',')
+                ${earthquakes_json})
 
             if [ "${satellite_view}" = "yes" ]; then
                 url="${google_maps_url}${coords}${zoom_factor}z/data=!3m1!1e3"
