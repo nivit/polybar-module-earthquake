@@ -48,9 +48,11 @@ show_icon="yes"
 
 tsunami_alert=1
 # see https://www.fileformat.info/info/unicode/char/2635/fontsupport.htm
-#tsunami_icon="☵"  # Unicode Character 'TRIGRAM FOR WATER' (U+2635)
+tsunami_icon="☵"  # Unicode Character 'TRIGRAM FOR WATER' (U+2635)
 # see https://www.fileformat.info/info/unicode/char/26a0/fontsupport.htm
-tsunami_icon="⚠ " # WARNING SIGN (U+26A0) Font Support
+#tsunami_icon="⚠ " # Unicode Character 'WARNING SIGN' (U+26A0)
+# see https://www.fileformat.info/info/unicode/char/1f30a/fontsupport.htm
+#tsunami_icon="🌊 "  # Unicode Character 'WATER WAVE' (U+1F30A)
 
 underline_title="yes"
 
