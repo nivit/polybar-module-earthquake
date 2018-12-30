@@ -45,6 +45,7 @@ magnitude_color="#cf6a4c"  # magnitude > 4
 satellite_view=yes  # or no
 
 show_icon="yes"
+show_time="yes"
 
 tsunami_alert=1
 # see https://www.fileformat.info/info/unicode/char/2635/fontsupport.htm
@@ -207,7 +208,13 @@ else
         icon=""
     fi
 
-    echo ${underline_format}${icon}${title}${tsunami_msg}
+    if [ "X${show_time}X" = "XyesX" ]; then
+        time=" - $(jq ${jq_args} ${jq_selector}'(.properties.time?/1000|todate)' ${earthquakes_json})"
+    else
+        time=""
+    fi
+
+    echo ${underline_format}${icon}${title}${tsunami_msg}${time}
 
     exit 0
 fi
