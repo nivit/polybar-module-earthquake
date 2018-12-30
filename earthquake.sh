@@ -11,14 +11,20 @@
 debug=0
 
 module_dir=${HOME}/.config/polybar/module/earthquake
+
 # program to download USGS data
 fetch_cmd=fetch  # FreeBSD
 
 earthquake_conf=${module_dir}/earthquake.conf
 
-earthquake_mode=latest  # or max
+earthquake_mode=latest  # or max or by_id
 
 earthquakes_json=${module_dir}/last_earthquakes.json
+
+#earth_icon="🜃"
+#earth_icon="☵"
+#earth_icon="🌍"
+earth_icon="♁"
 
 google_maps_url='https://maps.google.com/maps/@'
 
@@ -36,6 +42,8 @@ magnitude_color="#cf6a4c"  # magnitude > 4
 # satellite view in Google maps
 satellite_view=yes  # or no
 
+show_icon="yes"
+
 tsunami_alert=1
 tsunami_icon="⚠ "
 
@@ -49,6 +57,7 @@ zoom_factor=8
 xdg_cmd=xdg-open
 
 ################
+
 
 # override default values
 if [ -f ${earthquake_conf} ]; then
@@ -89,6 +98,21 @@ if [ -z "$1" -o ! -f "${earthquakes_json}" -a "${debug}" = "0" ]; then
     ${fetch_cmd} -o ${earthquakes_json} \
         ${fetch_options}  ${usgs_url}
 fi
+
+# jq (partial) filters
+case "${earthquake_mode}" in
+    "by_id")
+        jq_selector='.features[]|select(.id==$id?)|.properties.'
+        ;;
+    "latest")
+        jq_args="-r -M --arg id unknown"
+        jq_selector='first(.features[])|.properties.'
+        ;;
+    "max")
+        jq_args="-r -M --arg id unknown"
+        jq_selector='.features|max_by(.properties.mag)|.properties.'
+        ;;
+esac
 
 no_data='-- no earthquake data --'
 
@@ -136,7 +160,7 @@ if [ ! -z "$1" ]; then
     esac
 else
     if [ "${tsunami_alert}" = "yes" ]; then
-        tsunami=$(${jq_cmd} -r -M -f ${module_dir}/earthquake.jq --arg get tsunami --arg what ${earthquake_mode} ${earthquakes_json})
+        tsunami=$(jq ${jq_args} ${jq_selector}tsunami ${earthquakes_json})
         if [ "${tsunami}" = "1" ]; then
             tsunami_msg=" %{B#f00 F#fff}-- ${tsunami_icon} TSUNAMI ALERT --"
         fi
@@ -145,7 +169,7 @@ else
     fi
 
     if [ "X${underline_title}X" = "XyesX" ]; then
-        mag=$(${jq_cmd} -r -M -f ${module_dir}/earthquake.jq --arg get mag --arg what ${earthquake_mode} ${earthquakes_json})
+        mag=$(jq ${jq_args} ${jq_selector}mag ${earthquakes_json})
 
         case "${mag%%.*}" in
             "1")
@@ -169,9 +193,15 @@ else
         underline_format=""
     fi
 
-    title=$(${jq_cmd} -r -M -f ${module_dir}/earthquake.jq --arg get title --arg what ${earthquake_mode} ${earthquakes_json})
+    title=$(jq ${jq_args} ${jq_selector}title ${earthquakes_json})
 
-    echo ${underline_format}${title}${tsunami_msg}
+    if [ "X${show_icon}X" = "XyesX" ]; then
+        icon="${earth_icon} "
+    else
+        icon=""
+    fi
+
+    echo ${icon}${underline_format}${title}${tsunami_msg}
 
     exit 0
 fi
