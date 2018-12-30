@@ -19,7 +19,9 @@ earthquake_conf=${module_dir}/earthquake.conf
 
 earthquake_mode=latest  # or max or by_id
 
+current_earthquake=${module_dir}/current_earthquake.id
 earthquakes_json=${module_dir}/last_earthquakes.json
+earthquakes_ids=${module_dir}/earthquakes.ids
 
 # see https://www.fileformat.info/info/unicode/char/1f703/fontsupport.htm
 #earth_icon="🜃"  # Unicode Character 'ALCHEMICAL SYMBOL FOR EARTH' (U+1F703)
@@ -102,22 +104,36 @@ if ! xdg_cmd_loc="$(type -p "${xdg_cmd}")" || \
 fi
 
 # download USGS data
-if [ -z "$1" -o ! -f "${earthquakes_json}" -a "${debug}" = "0" ]; then
+if [ "${earthquake_mode}" != "by_id" -o \
+        ! -f "${earthquakes_json}" -o \
+        ! -s ${earthquakes_ids} -a \
+        "${debug}" = "0" \
+    ]; then
     ${fetch_cmd} -o ${earthquakes_json} \
         ${fetch_options}  ${usgs_url}
+
+    # check whether there are earthquakes in the last hour
+    no_data=$(jq -M 'if .metadata.count > 0 then 1 else 0 end' ${earthquakes_json})
+
+    if [ ! -s ${earthquakes_json} -o ${no_data} = 0 ]; then
+        echo '-- no earthquake data --'
+        exit 1
+    fi
+
+    # extract earthquakes ids
+    jq -r -M '.features[]|.id' ${earthquakes_json} > ${earthquakes_ids}
 fi
 
-# check whether there are earthquakes in the last hour
-no_data=$(jq -M 'if .metadata.count > 0 then 1 else 0 end' ${earthquakes_json})
-
-if [ ! -s ${earthquakes_json} -o ${no_data} = 0 ]; then
-    echo '-- no earthquake data --'
-    exit 1
+if [ ! -z "$1" ]; then
+    current_id=$(cat ${current_earthquake})
+else
+    current_id=$(head -n 1 ${earthquakes_ids} | tee ${current_earthquake})
 fi
 
 # jq (partial) filters
 case "${earthquake_mode}" in
     "by_id")
+        jq_args="-r -M --arg id ${current_id}"
         jq_selector='.features[]|select(.id==$id?)|'
         ;;
     "latest")
@@ -155,7 +171,9 @@ if [ ! -z "$1" ]; then
         "toggle-earthquake-mode")
             if [ "${earthquake_mode}" = "latest" ]; then
                 earthquake_mode=max
-            else
+            elif [ "${earthquake_mode}" = "max" ]; then
+                earthquake_mode=by_id
+            elif [ "${earthquake_mode}" = "by_id" ]; then
                 earthquake_mode=latest
             fi
 
