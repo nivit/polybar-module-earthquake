@@ -107,6 +107,14 @@ if [ -z "$1" -o ! -f "${earthquakes_json}" -a "${debug}" = "0" ]; then
         ${fetch_options}  ${usgs_url}
 fi
 
+# check whether there are earthquakes in the last hour
+no_data=$(jq -M 'if .metadata.count > 0 then 1 else 0 end' ${earthquakes_json})
+
+if [ ! -s ${earthquakes_json} -o ${no_data} = 0 ]; then
+    echo '-- no earthquake data --'
+    exit 1
+fi
+
 # jq (partial) filters
 case "${earthquake_mode}" in
     "by_id")
@@ -122,12 +130,6 @@ case "${earthquake_mode}" in
         ;;
 esac
 
-no_data='-- no earthquake data --'
-
-if [ ! -s ${earthquake_json} ]; then
-    echo ${no_data}
-    exit 1
-fi
 
 if [ ! -z "$1" ]; then
     case "$1" in
