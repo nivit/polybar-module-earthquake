@@ -11,17 +11,18 @@
 debug=0
 
 module_dir=${HOME}/.config/polybar/module/earthquake
+module_obj_dir=${module_dir}/obj
 
 # program to download USGS data
 fetch_cmd=fetch  # FreeBSD
 
 earthquake_conf=${module_dir}/earthquake.conf
 
-earthquake_mode=latest  # or max or by_id
+earthquake_mode=latest  # or max or all
 
-current_earthquake=${module_dir}/current_earthquake.id
-earthquakes_json=${module_dir}/last_earthquakes.json
-earthquakes_ids=${module_dir}/earthquakes.ids
+current_earthquake=${module_obj_dir}/current_earthquake.id
+earthquakes_json=${module_obj_dir}/last_earthquakes.json
+earthquakes_ids=${module_obj_dir}/earthquakes.ids
 
 # see https://www.fileformat.info/info/unicode/char/1f703/fontsupport.htm
 #earth_icon="🜃"  # Unicode Character 'ALCHEMICAL SYMBOL FOR EARTH' (U+1F703)
@@ -68,6 +69,9 @@ xdg_cmd=xdg-open
 
 ################
 
+if [ ! -f ${module_obj_dir} ]; then
+    mkdir -p ${module_obj_dir}
+fi
 
 # override default values
 if [ -f ${earthquake_conf} ]; then
@@ -104,7 +108,7 @@ if ! xdg_cmd_loc="$(type -p "${xdg_cmd}")" || \
 fi
 
 # download USGS data
-if [ "${earthquake_mode}" != "by_id" -o \
+if [ "${earthquake_mode}" != "all" -o \
         ! -f "${earthquakes_json}" -o \
         ! -s ${earthquakes_ids} -a \
         "${debug}" = "0" \
@@ -128,11 +132,12 @@ if [ ! -z "$1" ]; then
     current_id=$(cat ${current_earthquake})
 else
     current_id=$(head -n 1 ${earthquakes_ids} | tee ${current_earthquake})
+    sed -i.bak -e '1d' ${earthquakes_ids}
 fi
 
 # jq (partial) filters
 case "${earthquake_mode}" in
-    "by_id")
+    "all")
         jq_args="-r -M --arg id ${current_id}"
         jq_selector='.features[]|select(.id==$id?)|'
         ;;
@@ -172,13 +177,13 @@ if [ ! -z "$1" ]; then
             if [ "${earthquake_mode}" = "latest" ]; then
                 earthquake_mode=max
             elif [ "${earthquake_mode}" = "max" ]; then
-                earthquake_mode=by_id
-            elif [ "${earthquake_mode}" = "by_id" ]; then
+                earthquake_mode=all
+            elif [ "${earthquake_mode}" = "all" ]; then
                 earthquake_mode=latest
             fi
 
             sed -i.bak -e "s/^\(earthquake_mode=\).*/\1${earthquake_mode}/" \
-                ${module_dir}/earthquake.conf
+                ${earthquake_conf}
         ;;
         *)
             echo "-- unknown argument --"
