@@ -28,8 +28,6 @@ earth_icon="♁"
 
 google_maps_url='https://maps.google.com/maps/@'
 
-jq_cmd=jq  # program to parse USGS data
-
 magnitude1_color="#8f9d6a"
 magnitude2_color="#838184"
 magnitude3_color="#9b703f"
@@ -81,9 +79,9 @@ case "${fetch_cmd}" in
     ;;
 esac
 
-if ! jq_cmd_loc="$(type -p "${jq_cmd}")" || \
+if ! jq_cmd_loc="$(type -p "jq")" || \
     [[ -z ${jq_cmd_loc} ]]; then
-    echo "-- ${jq_cmd} not installed!";
+    echo "-- jq not installed!";
     exit 1
 fi
 
@@ -124,7 +122,7 @@ fi
 if [ ! -z "$1" ]; then
     case "$1" in
         "open-google-map")
-            coords=$(${jq_cmd} -c -M -f ${module_dir}/earthquake.jq --arg get coords --arg what ${earthquake_mode} \
+            coords=$(jq -c -M -f ${module_dir}/earthquake.jq --arg get coords --arg what ${earthquake_mode} \
                 ${earthquakes_json})
 
             if [ "${satellite_view}" = "yes" ]; then
@@ -138,7 +136,7 @@ if [ ! -z "$1" ]; then
             exit 0
         ;;
         "open-event-page")
-            url="$(${jq_cmd} -r -M -f ${module_dir}/earthquake.jq --arg get url --arg what ${earthquake_mode} \
+            url="$(jq -r -M -f ${module_dir}/earthquake.jq --arg get url --arg what ${earthquake_mode} \
                 ${earthquakes_json})"
             ${xdg_cmd} ${url}&
             exit 0
