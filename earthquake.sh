@@ -21,10 +21,14 @@ earthquake_mode=latest  # or max or by_id
 
 earthquakes_json=${module_dir}/last_earthquakes.json
 
-#earth_icon="🜃"
-#earth_icon="☵"
-#earth_icon="🌍"
-earth_icon="♁"
+# see https://www.fileformat.info/info/unicode/char/1f703/fontsupport.htm
+#earth_icon="🜃"  # Unicode Character 'ALCHEMICAL SYMBOL FOR EARTH' (U+1F703)
+# see https://www.fileformat.info/info/unicode/char/1f30d/fontsupport.htm
+#earth_icon="🌍"  # Unicode Character 'EARTH GLOBE EUROPE-AFRICA' (U+1F30D)
+# see https://www.fileformat.info/info/unicode/char/2637/fontsupport.htm
+earth_icon="☷ "  # Unicode Character 'TRIGRAM FOR EARTH' (U+2637)
+# see https://www.fileformat.info/info/unicode/char/2641/fontsupport.htm
+#earth_icon="♁"  # Unicode Character 'EARTH' (U+2641)
 
 google_maps_url='https://maps.google.com/maps/@'
 
@@ -43,7 +47,10 @@ satellite_view=yes  # or no
 show_icon="yes"
 
 tsunami_alert=1
-tsunami_icon="⚠ "
+# see https://www.fileformat.info/info/unicode/char/2635/fontsupport.htm
+#tsunami_icon="☵"  # Unicode Character 'TRIGRAM FOR WATER' (U+2635)
+# see https://www.fileformat.info/info/unicode/char/26a0/fontsupport.htm
+tsunami_icon="⚠ " # WARNING SIGN (U+26A0) Font Support
 
 underline_title="yes"
 
