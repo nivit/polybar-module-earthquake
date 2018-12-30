@@ -107,15 +107,15 @@ fi
 # jq (partial) filters
 case "${earthquake_mode}" in
     "by_id")
-        jq_selector='.features[]|select(.id==$id?)|.properties.'
+        jq_selector='.features[]|select(.id==$id?)|'
         ;;
     "latest")
         jq_args="-r -M --arg id unknown"
-        jq_selector='first(.features[])|.properties.'
+        jq_selector='first(.features[])|'
         ;;
     "max")
         jq_args="-r -M --arg id unknown"
-        jq_selector='.features|max_by(.properties.mag)|.properties.'
+        jq_selector='.features|max_by(.properties.mag)|'
         ;;
 esac
 
@@ -129,13 +129,13 @@ fi
 if [ ! -z "$1" ]; then
     case "$1" in
         "open-google-map")
-            coords=$(jq -c -M -f ${module_dir}/earthquake.jq --arg get coords --arg what ${earthquake_mode} \
+            coords=$(jq ${jq_args} ${jq_selector}'[.geometry.coordinates[1,0]?] | tostring | ltrimstr("[") | rtrimstr("]")' \
                 ${earthquakes_json})
 
             if [ "${satellite_view}" = "yes" ]; then
-                url="${google_maps_url}${coords}${zoom_factor}z/data=!3m1!1e3"
+                url="${google_maps_url}${coords},${zoom_factor}z/data=!3m1!1e3"
             else
-                url="${google_maps_url}${coords}${zoom_factor}z"
+                url="${google_maps_url}${coords},${zoom_factor}z"
             fi
 
             ${xdg_cmd} ${url}&
@@ -143,8 +143,7 @@ if [ ! -z "$1" ]; then
             exit 0
         ;;
         "open-event-page")
-            url="$(jq -r -M -f ${module_dir}/earthquake.jq --arg get url --arg what ${earthquake_mode} \
-                ${earthquakes_json})"
+            url=$(jq ${jq_args} ${jq_selector}.properties.url ${earthquakes_json})
             ${xdg_cmd} ${url}&
             exit 0
         ;;
@@ -165,7 +164,7 @@ if [ ! -z "$1" ]; then
     esac
 else
     if [ "${tsunami_alert}" = "yes" ]; then
-        tsunami=$(jq ${jq_args} ${jq_selector}tsunami ${earthquakes_json})
+        tsunami=$(jq ${jq_args} ${jq_selector}.properties.tsunami ${earthquakes_json})
         if [ "${tsunami}" = "1" ]; then
             tsunami_msg=" %{B#f00 F#fff}-- ${tsunami_icon} TSUNAMI ALERT --"
         fi
@@ -174,7 +173,7 @@ else
     fi
 
     if [ "X${underline_title}X" = "XyesX" ]; then
-        mag=$(jq ${jq_args} ${jq_selector}mag ${earthquakes_json})
+        mag=$(jq ${jq_args} ${jq_selector}.properties.mag ${earthquakes_json})
 
         case "${mag%%.*}" in
             "1")
@@ -198,7 +197,7 @@ else
         underline_format=""
     fi
 
-    title=$(jq ${jq_args} ${jq_selector}title ${earthquakes_json})
+    title=$(jq ${jq_args} ${jq_selector}.properties.title ${earthquakes_json})
 
     if [ "X${show_icon}X" = "XyesX" ]; then
         icon="${earth_icon} "
