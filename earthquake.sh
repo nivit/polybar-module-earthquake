@@ -199,7 +199,7 @@ else
         icon=""
     fi
 
-    echo ${icon}${underline_format}${title}${tsunami_msg}
+    echo ${underline_format}${icon}${title}${tsunami_msg}
 
     exit 0
 fi
