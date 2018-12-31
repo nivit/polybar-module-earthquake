@@ -22,7 +22,7 @@ For more information about which earthquakes are shown, see  [ComCat Documentati
 ## Installation
 Clone or download this repository, then run the following commands:
 ```
-$ cd polybar-module-earthquake
+$ cd polybar-module-earthquake  # directory where you clone the repository or unzip the release file
 $ sh install.sh
 ```
 Enable this module in your bar, e.g:
@@ -33,6 +33,11 @@ modules-left = earthquake ...
 ```
 
 Finally, restart polybar.
+
+## Configuration
+You can change the behavior of this module, by editing the following files:
+- `~/.config/polybar/scripts/earthquake/eartquake.conf` (for appearence and behavior of the script);
+- `~/config/polybar/scripts/earthquakes/module.conf` (for binding to mouse buttons).
 
 ## License
 This software is licensed under the MIT license. See [LICENSE](LICENSE.md)
