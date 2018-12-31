@@ -7,8 +7,6 @@ For more information about which earthquakes are shown, see  [ComCat Documentati
 
 ## Screenshots
 
-Output of this script
-
 <img alt="Screenshot of polybar module: earthquake" src="screenshots/polybar-module-earthquake.png" width="643">
 
 *Output of this script*
