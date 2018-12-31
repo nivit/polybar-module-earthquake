@@ -14,8 +14,9 @@ debug=0
 download_interval=300
 
 # program to download USGS data
-fetch_cmd=fetch  # (curl|fetch|wget)
+fetch_cmd=curl  # (curl|fetch|wget)
 
+# what earthquake to show
 earthquake_mode=all  # (all|latest|max)
 
 # see https://www.fileformat.info/info/unicode/char/1f703/fontsupport.htm
@@ -27,8 +28,8 @@ earth_icon="☷ "  # Unicode Character 'TRIGRAM FOR EARTH' (U+2637)
 # see https://www.fileformat.info/info/unicode/char/2641/fontsupport.htm
 #earth_icon="♁"  # Unicode Character 'EARTH' (U+2641)
 
-google_maps_url='https://maps.google.com/maps/@'
 
+# underline color
 magnitude1_color="#8f9d6a"
 magnitude2_color="#838184"
 magnitude3_color="#9b703f"
@@ -51,23 +52,25 @@ tsunami_icon="☵"  # Unicode Character 'TRIGRAM FOR WATER' (U+2635)
 
 underline_title="yes"
 
-usgs_url='https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/1.0_hour.geojson'
-
-xdg_cmd=xdg-open
-
 # zoom factor on Google maps
 zoom_factor=8
 
-# working files
+xdg_cmd=xdg-open
+
+################
+# start script #
+################
+
 module_dir=${HOME}/.config/polybar/module/earthquake
+module_obj_dir=${module_dir}/obj
 current_earthquake=${module_obj_dir}/current_earthquake.id
 earthquake_conf=${module_dir}/earthquake.conf
 earthquakes_ids=${module_obj_dir}/earthquakes.ids
 earthquakes_json=${module_obj_dir}/last_earthquakes.json
 last_download=${module_obj_dir}/last_download_time
-module_obj_dir=${module_dir}/obj
 
-## START SCRIPT ###
+google_maps_url='https://maps.google.com/maps/@'
+usgs_url='https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/1.0_hour.geojson'
 
 if [ ! -f ${module_obj_dir} ]; then
     mkdir -p ${module_obj_dir}
@@ -82,7 +85,7 @@ fi
 if ! fetch_cmd_loc="$(type -p "${fetch_cmd}")" || \
     [[ -z ${fetch_cmd_loc} ]]; then
     echo "-- ${fetch_cmd} not installed!";
-    exit 1
+    exit 0
 fi
 
 # select the correct silent option for the fetch command
@@ -98,13 +101,13 @@ esac
 if ! jq_cmd_loc="$(type -p "jq")" || \
     [[ -z ${jq_cmd_loc} ]]; then
     echo "-- jq not installed!";
-    exit 1
+    exit 0
 fi
 
 if ! xdg_cmd_loc="$(type -p "${xdg_cmd}")" || \
     [[ -z ${xdg_cmd_loc} ]]; then
     echo "-- ${xdg_cmd} not installed!";
-    exit 1
+    exit 0
 fi
 
 if [ -f ${last_download} ]; then
@@ -120,15 +123,10 @@ fi
 
 # download USGS data
 if [ ! -f ${last_download} ]; then
-    ${fetch_cmd} -o ${earthquakes_json} \
-        ${fetch_options}  ${usgs_url}
-
-    # check whether there are earthquakes in the last hour
-    no_data=$(jq -M 'if .metadata.count > 0 then 1 else 0 end' ${earthquakes_json})
-
-    if [ ! -s ${earthquakes_json} -o ${no_data} = 0 ]; then
-        echo '-- no earthquake data --'
-        exit 1
+    if [ "${debug}" = "1" -a -f ${earthquakes_json}.test ]; then
+        cp ${earthquakes_json}.test ${earthquakes_json}
+    else
+        ${fetch_cmd} -o ${earthquakes_json} ${fetch_options} ${usgs_url}
     fi
 
     # extract earthquakes ids
@@ -138,7 +136,16 @@ if [ ! -f ${last_download} ]; then
     date +%s > ${last_download}
 fi
 
-# set current earthquake id (used when mode is "all")
+# check whether there are earthquakes in the last hour
+if [ -f ${earthquakes_json} ]; then
+    no_data=$(jq -r -M 'if .metadata.count > 0 then 1 else 0 end' ${earthquakes_json})
+
+    if [ ! -s ${earthquakes_json} -o "${no_data}" = "0" ]; then
+        echo '-- no earthquake data --'
+        exit 0
+    fi
+fi
+
 if [ ! -z "$1" ]; then
     current_id=$(cat ${current_earthquake})
 else
@@ -167,8 +174,8 @@ case "${earthquake_mode}" in
         ;;
 esac
 
+
 if [ ! -z "$1" ]; then
-    # handle script arguments
     case "$1" in
         "open-google-map")
             coords=$(jq ${jq_args} ${jq_selector}'[.geometry.coordinates[1,0]?] | tostring | ltrimstr("[") | rtrimstr("]")' \
