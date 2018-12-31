@@ -8,14 +8,13 @@ For more information about which earthquakes are shown, see  [ComCat Documentati
 ## Screenshots
 
 <img alt="Screenshot of polybar module: earthquake" src="screenshots/polybar-module-earthquake.png" width="643">
-
-USGS event page - [M 1.5 - 13km SSW of Big Bear Lake, CA](https://earthquake.usgs.gov/earthquakes/eventpage/ci38412120/executive)
+*Output of this script*
 
 <img alt="USGS event page for earthquake with id ci38412120" src="screenshots/usgs-ci38412120-event-page.png" width="643">
-
-Location of the event on Google Maps
+*USGS event page - [M 1.5 - 13km SSW of Big Bear Lake, CA](https://earthquake.usgs.gov/earthquakes/eventpage/ci38412120/executive)*
 
 <img alt="Location of the event on Google Maps" src="screenshots/usgs-ci38412120-google-map.png" width="643">
+*Location of the event on Google Maps*
 
 ## Installation
 Clone or download this repository, then run the following commands:
