@@ -10,6 +10,9 @@
 
 debug=0
 
+# how many seconds to wait before downloading new data
+download_interval=300
+
 module_dir=${HOME}/.config/polybar/module/earthquake
 module_obj_dir=${module_dir}/obj
 
@@ -34,6 +37,8 @@ earth_icon="☷ "  # Unicode Character 'TRIGRAM FOR EARTH' (U+2637)
 #earth_icon="♁"  # Unicode Character 'EARTH' (U+2641)
 
 google_maps_url='https://maps.google.com/maps/@'
+
+last_download=${module_obj_dir}/last_download_time
 
 magnitude1_color="#8f9d6a"
 magnitude2_color="#838184"
@@ -107,12 +112,18 @@ if ! xdg_cmd_loc="$(type -p "${xdg_cmd}")" || \
     exit 1
 fi
 
+if [ -f ${last_download} ]; then
+    old_time=$(cat ${last_download})
+    new_time=$(date +%s)
+
+    delta_time=$((${new_time} - ${old_time}))
+
+    if [ ${delta_time} -gt ${download_interval} ]; then
+        rm -f ${last_download}
+    fi
+fi
 # download USGS data
-if [ "${earthquake_mode}" != "all" -o \
-        ! -f "${earthquakes_json}" -o \
-        ! -s ${earthquakes_ids} -a \
-        "${debug}" = "0" \
-    ]; then
+if [ ! -f ${last_download} ]; then
     ${fetch_cmd} -o ${earthquakes_json} \
         ${fetch_options}  ${usgs_url}
 
@@ -126,6 +137,9 @@ if [ "${earthquake_mode}" != "all" -o \
 
     # extract earthquakes ids
     jq -r -M '.features[]|.id' ${earthquakes_json} > ${earthquakes_ids}
+    cp ${earthquakes_ids} ${earthquakes_ids}.all
+
+    date +%s > ${last_download}
 fi
 
 if [ ! -z "$1" ]; then
@@ -133,6 +147,11 @@ if [ ! -z "$1" ]; then
 else
     current_id=$(head -n 1 ${earthquakes_ids} | tee ${current_earthquake})
     sed -i.bak -e '1d' ${earthquakes_ids}
+
+    if [ ! -s ${earthquakes_ids} \
+        -a -f ${earthquakes_ids}.all ]; then
+        cp -f ${earthquakes_ids}.all ${earthquakes_ids}
+    fi
 fi
 
 # jq (partial) filters
