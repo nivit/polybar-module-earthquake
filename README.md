@@ -40,7 +40,7 @@ You can change the behavior of this module, by editing the following files:
 - `~/config/polybar/scripts/earthquakes/module.conf` (for binding to mouse buttons).
 
 ## Running
-By default the module cyclically shows the magnitude, title and time of the seismic events in the last hour. You can change this behavior by clicking with the middle button of your mouse on the bar. So the bar will show the latest earthquake and, after another middle click, the event with max magnitude, and so on.
+By default the module cyclically shows magnitude, title and time of the seismic events in the last hour. You can change this behavior by clicking with the middle button of your mouse on the bar. So the bar will show the latest earthquake and, after another middle click, the event with max magnitude, and so on.
 
 ## License
 This software is licensed under the MIT license. See [LICENSE](LICENSE.md)
