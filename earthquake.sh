@@ -13,19 +13,10 @@ debug=0
 # how many seconds to wait before downloading new data
 download_interval=300
 
-module_dir=${HOME}/.config/polybar/module/earthquake
-module_obj_dir=${module_dir}/obj
-
 # program to download USGS data
-fetch_cmd=fetch  # FreeBSD
+fetch_cmd=fetch  # (curl|fetch|wget)
 
-earthquake_conf=${module_dir}/earthquake.conf
-
-earthquake_mode=latest  # or max or all
-
-current_earthquake=${module_obj_dir}/current_earthquake.id
-earthquakes_json=${module_obj_dir}/last_earthquakes.json
-earthquakes_ids=${module_obj_dir}/earthquakes.ids
+earthquake_mode=all  # (all|latest|max)
 
 # see https://www.fileformat.info/info/unicode/char/1f703/fontsupport.htm
 #earth_icon="🜃"  # Unicode Character 'ALCHEMICAL SYMBOL FOR EARTH' (U+1F703)
@@ -38,16 +29,11 @@ earth_icon="☷ "  # Unicode Character 'TRIGRAM FOR EARTH' (U+2637)
 
 google_maps_url='https://maps.google.com/maps/@'
 
-last_download=${module_obj_dir}/last_download_time
-
 magnitude1_color="#8f9d6a"
 magnitude2_color="#838184"
 magnitude3_color="#9b703f"
 magnitude4_color="#f9ee98"
 magnitude_color="#cf6a4c"  # magnitude > 4
-
-# alert on an earthquake with a magnitude greater than that
-#min_magnitude=1
 
 # satellite view in Google maps
 satellite_view=yes  # or no
@@ -67,12 +53,21 @@ underline_title="yes"
 
 usgs_url='https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/1.0_hour.geojson'
 
+xdg_cmd=xdg-open
+
 # zoom factor on Google maps
 zoom_factor=8
 
-xdg_cmd=xdg-open
+# working files
+module_dir=${HOME}/.config/polybar/module/earthquake
+current_earthquake=${module_obj_dir}/current_earthquake.id
+earthquake_conf=${module_dir}/earthquake.conf
+earthquakes_ids=${module_obj_dir}/earthquakes.ids
+earthquakes_json=${module_obj_dir}/last_earthquakes.json
+last_download=${module_obj_dir}/last_download_time
+module_obj_dir=${module_dir}/obj
 
-################
+## START SCRIPT ###
 
 if [ ! -f ${module_obj_dir} ]; then
     mkdir -p ${module_obj_dir}
@@ -122,6 +117,7 @@ if [ -f ${last_download} ]; then
         rm -f ${last_download}
     fi
 fi
+
 # download USGS data
 if [ ! -f ${last_download} ]; then
     ${fetch_cmd} -o ${earthquakes_json} \
@@ -142,6 +138,7 @@ if [ ! -f ${last_download} ]; then
     date +%s > ${last_download}
 fi
 
+# set current earthquake id (used when mode is "all")
 if [ ! -z "$1" ]; then
     current_id=$(cat ${current_earthquake})
 else
@@ -170,8 +167,8 @@ case "${earthquake_mode}" in
         ;;
 esac
 
-
 if [ ! -z "$1" ]; then
+    # handle script arguments
     case "$1" in
         "open-google-map")
             coords=$(jq ${jq_args} ${jq_selector}'[.geometry.coordinates[1,0]?] | tostring | ltrimstr("[") | rtrimstr("]")' \
