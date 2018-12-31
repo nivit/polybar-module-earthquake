@@ -61,7 +61,7 @@ xdg_cmd=xdg-open
 # start script #
 ################
 
-module_dir=${HOME}/.config/polybar/module/earthquake
+module_dir=${HOME}/.config/polybar/scripts/earthquake
 module_obj_dir=${module_dir}/obj
 current_earthquake=${module_obj_dir}/current_earthquake.id
 earthquake_conf=${module_dir}/earthquake.conf
