@@ -23,6 +23,14 @@ Clone or download this repository, then run the following commands:
 $ cd polybar-module-earthquake
 $ sh install.sh
 ```
+Enable this module in your bar, e.g:
+```
+[bar/mybar]
+...
+modules-left = earthquake ...
+```
+
+Finally, restart polybar.
 
 ## License
 This software is licensed under the MIT license. See [LICENSE](LICENSE.md)
