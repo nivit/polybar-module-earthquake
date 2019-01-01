@@ -34,6 +34,9 @@ modules-left = earthquake ...
 
 Finally, restart polybar.
 
+## Dependencies
+This script requires [jq](https://stedolan.github.com/jq/) for parsing data, and [curl](https://curl.haxx.se/) or [wget](https://www.gnu.org/s/wget/) for downloading data.
+
 ## Configuration
 You can change the behavior of this module, by editing the following files:
 - `~/.config/polybar/scripts/earthquake/eartquake.conf` (for appearence and behavior of the script);
