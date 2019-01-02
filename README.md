@@ -39,11 +39,11 @@ This script requires [bash](https://www.gnu.org/software/bash/), [jq](https://st
 
 ## Configuration
 You can change the behavior of this module, by editing the following files:
-- `~/.config/polybar/scripts/earthquake/eartquake.conf` (for appearence and behavior of the script);
+- `~/.config/polybar/scripts/earthquake/earthquake.conf` (for appearence and behavior of the script);
 - `~/config/polybar/scripts/earthquakes/module.conf` (for binding to mouse buttons).
 
 ## Running
 By default the module cyclically shows magnitude, title and time of the seismic events in the last hour. You can change this behavior by clicking with the middle button of your mouse on the bar. So the bar will show the latest earthquake and, after another middle click, the event with max magnitude, and so on.
 
 ## License
-This software is licensed under the MIT license. See [LICENSE](LICENSE.md)
+This software is licensed under the MIT license. See [LICENSE](LICENSE.md).
