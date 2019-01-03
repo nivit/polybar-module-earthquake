@@ -146,7 +146,7 @@ if [ -f ${earthquakes_json} ]; then
     fi
 fi
 
-if [ ! -z "$1" ]; then
+if [ -n "$1" ]; then
     current_id=$(cat ${current_earthquake})
 else
     current_id=$(head -n 1 ${earthquakes_ids} | tee ${current_earthquake})
@@ -175,7 +175,7 @@ case "${earthquake_mode}" in
 esac
 
 
-if [ ! -z "$1" ]; then
+if [ -n "$1" ]; then
     case "$1" in
         "open-google-map")
             coords=$(jq ${jq_args} ${jq_selector}'[.geometry.coordinates[1,0]?] | tostring | ltrimstr("[") | rtrimstr("]")' \
