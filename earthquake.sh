@@ -235,7 +235,7 @@ else
         mag=$(jq ${jq_args} ${jq_selector}.properties.mag ${earthquakes_json})
 
         case "${mag%%.*}" in
-            "1")
+            "0"|"1")
                 underline_color=${magnitude1_color}
                 ;;
             "2")
